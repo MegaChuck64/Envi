@@ -10,7 +10,7 @@ public class PlayerControls : MonoBehaviour
     public float jumpSpeed;
     public TriggerEventHandler feet;
     public Tilemap tileMap;
-    
+    public float health;
     private Rigidbody2D _rigidbody2D;
     private SpriteRenderer _spriteRenderer;
 
@@ -144,6 +144,34 @@ public class PlayerControls : MonoBehaviour
                     doorEntered = true;
                 }
             }
+        }
+    }
+    public void TakeDamage(float dmg)
+    {
+        health -= dmg;
+
+        //play damage animation
+        StartCoroutine(DamageAnimation());
+
+        if (health <= 0)
+        {
+            //go back to level 0 for now 
+            Debug.Log("Game Over"); //todo: game over
+            SceneManager.LoadScene("Level 0", LoadSceneMode.Single);
+        }
+    }
+    
+    private IEnumerator DamageAnimation()
+    {
+        //flash back and forth from red to white mutliple tines
+        var count = 0;
+        while (count < 3)
+        {
+            _spriteRenderer.color = Color.red;
+            yield return new WaitForSeconds(.1f);
+            _spriteRenderer.color = Color.white;
+            yield return new WaitForSeconds(.1f);
+            count++;
         }
     }
 
