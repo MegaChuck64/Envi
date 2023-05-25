@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Ghost : MonoBehaviour
@@ -5,8 +6,14 @@ public class Ghost : MonoBehaviour
     public float health = 100f;
     public float hoverOffset = 0.4f;
     public float moveSpeed;
+    public float blinkSpeed;
     public float attackDamage;
     public Vector2 target;
+
+    private void Start()
+    {
+        StartCoroutine(PingPongAlpha());
+    }
     
     private void Update()
     {
@@ -16,8 +23,22 @@ public class Ghost : MonoBehaviour
         }
 
         //make ghost hover like a sin wave at target
-        transform.position = new Vector2(transform.position.x, target.y + Mathf.Sin(Time.time * moveSpeed) * hoverOffset);
+        transform.position = new Vector2(transform.position.x, target.y + Mathf.Sin(Time.time * moveSpeed) * hoverOffset);       
     }
+
+    public IEnumerator PingPongAlpha ()
+    {
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        Color color = spriteRenderer.color;
+        while (true)
+        {
+            float alpha = Mathf.PingPong(Time.time * blinkSpeed, 1);
+            color.a = alpha;
+            spriteRenderer.color = color;
+            yield return null;
+        }
+    }
+
 
     public void TakeDamage(float damage)
     {
@@ -28,7 +49,10 @@ public class Ghost : MonoBehaviour
     {
         if (collision.CompareTag("Player"))
         {
-            collision.GetComponent<PlayerControls>().TakeDamage(attackDamage);
+            if (GetComponent<SpriteRenderer>().color.a >= 0.5f)
+            {
+                collision.GetComponent<PlayerControls>().TakeDamage(attackDamage);
+            }
         }
     }
 }
